@@ -1,9 +1,6 @@
 syntax = "proto3";
 
-service Monitoring {
-    rpc StreamLogs() returns (stream LogEntry) {}
-    
-}
+import "google/protobuf/empty.proto";
 
 message LogEntry {
     int32 Severity = 1;
@@ -11,3 +8,8 @@ message LogEntry {
     int64 Timestamp = 3;
     string Message = 4;
 }
+
+service Monitoring {
+    rpc StreamLogs(google.protobuf.Empty) returns (stream LogEntry) {}
+}
+
