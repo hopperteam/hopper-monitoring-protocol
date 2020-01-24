@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+service Monitoring {
+    rpc StreamLogs() returns (stream LogEntry) {}
+    
+}
+
+message LogEntry {
+    int32 Severity = 1;
+    string Component = 2;
+    int64 Timestamp = 3;
+    string Message = 4;
+}
