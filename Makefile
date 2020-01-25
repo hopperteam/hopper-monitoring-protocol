@@ -5,4 +5,4 @@ logentry.js: protocol.proto
     --ts_out="."
 
 protocol.pb.go: protocol.proto
-	protoc protocol.proto --go_out=.
+	cd .. && protoc protocol.proto --go_out=.

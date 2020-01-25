@@ -4,9 +4,13 @@
 package protocol
 
 import (
+	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	_ "github.com/golang/protobuf/ptypes/empty"
+	empty "github.com/golang/protobuf/ptypes/empty"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -105,4 +109,111 @@ var fileDescriptor_2bc2336598a3f7e0 = []byte{
 	0xe8, 0x38, 0x62, 0xef, 0x2e, 0x64, 0x92, 0x7c, 0xd4, 0x4b, 0xb7, 0x5e, 0xbb, 0xf5, 0x79, 0xee,
 	0x2e, 0x0b, 0xbd, 0x06, 0x1f, 0xae, 0x5e, 0xc4, 0x70, 0x97, 0xf5, 0xe9, 0x2f, 0x00, 0x00, 0xff,
 	0xff, 0xeb, 0x8f, 0x76, 0xe2, 0xf6, 0x00, 0x00, 0x00,
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// MonitoringClient is the client API for Monitoring service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type MonitoringClient interface {
+	StreamLogs(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (Monitoring_StreamLogsClient, error)
+}
+
+type monitoringClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewMonitoringClient(cc *grpc.ClientConn) MonitoringClient {
+	return &monitoringClient{cc}
+}
+
+func (c *monitoringClient) StreamLogs(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (Monitoring_StreamLogsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Monitoring_serviceDesc.Streams[0], "/Monitoring/StreamLogs", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &monitoringStreamLogsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Monitoring_StreamLogsClient interface {
+	Recv() (*LogEntry, error)
+	grpc.ClientStream
+}
+
+type monitoringStreamLogsClient struct {
+	grpc.ClientStream
+}
+
+func (x *monitoringStreamLogsClient) Recv() (*LogEntry, error) {
+	m := new(LogEntry)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// MonitoringServer is the server API for Monitoring service.
+type MonitoringServer interface {
+	StreamLogs(*empty.Empty, Monitoring_StreamLogsServer) error
+}
+
+// UnimplementedMonitoringServer can be embedded to have forward compatible implementations.
+type UnimplementedMonitoringServer struct {
+}
+
+func (*UnimplementedMonitoringServer) StreamLogs(req *empty.Empty, srv Monitoring_StreamLogsServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamLogs not implemented")
+}
+
+func RegisterMonitoringServer(s *grpc.Server, srv MonitoringServer) {
+	s.RegisterService(&_Monitoring_serviceDesc, srv)
+}
+
+func _Monitoring_StreamLogs_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(empty.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MonitoringServer).StreamLogs(m, &monitoringStreamLogsServer{stream})
+}
+
+type Monitoring_StreamLogsServer interface {
+	Send(*LogEntry) error
+	grpc.ServerStream
+}
+
+type monitoringStreamLogsServer struct {
+	grpc.ServerStream
+}
+
+func (x *monitoringStreamLogsServer) Send(m *LogEntry) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+var _Monitoring_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "Monitoring",
+	HandlerType: (*MonitoringServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamLogs",
+			Handler:       _Monitoring_StreamLogs_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "protocol.proto",
 }
